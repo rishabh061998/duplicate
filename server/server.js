@@ -7,6 +7,7 @@ import Connection from './database/db.js';
 import DefaultData from './default.js';
 import Router from './routes/route.js';
 import {v4 as uuid} from 'uuid';
+import path from 'path'
 
 const app=express();
 
@@ -19,11 +20,22 @@ app.use(bodyParser.json({extended:true}))
 app.use(bodyParser.urlencoded({extended:true}))
 app.use('/',Router);
 
-const PORT=9000;
+const PORT=process.env.PORT || 9000;
+
 const USERNAME=process.env.DB_USERNAME;
 const PASSWORD=process.env.DB_PASSWORD;
 
-Connection(USERNAME,PASSWORD);
+
+const URL=process.env.MONGODB_URI || `mongodb://${USERNAME}:${PASSWORD}@ac-sahh51o-shard-00-00.s1qukx5.mongodb.net:27017,ac-sahh51o-shard-00-01.s1qukx5.mongodb.net:27017,ac-sahh51o-shard-00-02.s1qukx5.mongodb.net:27017/ECOMMERCE?ssl=true&replicaSet=atlas-ui9k9r-shard-0&authSource=admin&retryWrites=true&w=majority`;
+
+
+Connection(URL);
+
+const __dirname =path.resolve();
+app.use(express.static(path.join(__dirname,'/client/build')));
+app.get('*',(req,res)=>
+    res.sendFile(path.join(__dirname,'/client/build/index.html'))
+)
 
 app.listen(PORT,()=>console.log(`Server is running successfully on PORT ${PORT} `));
 
@@ -39,6 +51,6 @@ paytmParams['INDUSTRY_TYPE_ID'] = process.env.PAYTM_INDUSTRY_TYPE_ID;
 paytmParams['ORDER_ID'] = uuid();
 paytmParams['CUST_ID'] = process.env.PAYTM_CUST_ID;
 paytmParams['TXN_AMOUNT'] = '100';
-paytmParams['CALLBACK_URL'] = 'http://localhost:9000/callback';
+paytmParams['CALLBACK_URL'] = 'callback';
 paytmParams['EMAIL'] = 'rishi.march25@gmail.com';
 paytmParams['MOBILE_NO'] = '1234567890';
